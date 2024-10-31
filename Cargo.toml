@@ -1,0 +1,15 @@
+[package]
+name = "protein_predictor_in_rust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+colored = "2.0"
+
+[[bin]]
+name = "fasta_parser"
+path = "src/bin/fasta_parser.rs"
+
+[[bin]]
+name = "structure_predictor"
+path = "src/bin/structure_predictor.rs"
