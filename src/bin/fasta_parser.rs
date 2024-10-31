@@ -46,7 +46,7 @@ pub fn parse_fasta(file_path: &str) -> Result<Vec<Protein>, std::io::Error> {
 }
 
 fn main() {
-    let fasta_file = r"D:\VSCode\lung_cancer_FASTA\combined_fasta.fasta";
+    let fasta_file = r"D:\VSCode\protein_predictor_in_rust\lung_cancer_FASTA\combined_fasta.fasta";
     match parse_fasta(fasta_file) {
         Ok(proteins) => {
             for protein in proteins {
