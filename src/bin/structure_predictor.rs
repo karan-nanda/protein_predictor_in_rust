@@ -42,29 +42,46 @@ pub fn find_nucleation_regions(sequence: &str, conformation: &str, window_thresh
 
 pub fn extend_regions(seq: &str, regions: Vec<(usize, usize)>, conformation: &str) -> Vec<(usize, usize)> {
     let mut extended_regions = Vec::new();
+
     for reg in regions {
         let mut n_shift = 0;
         let mut c_shift = 0;
-        let mut shift = (reg.0, reg.0 + 4);
 
-        // Moving towards the N-Terminus
-        while shift.0 > 0 && average_param(conformation, &seq[shift.0..shift.1]) >= 1.0 {
-            n_shift += 1;
-            shift = (shift.0 - 1, shift.1); // Correct the shift logic
+        // Helix extension: grow in multiples of ~3 residues
+        if conformation == "alpha" {
+            while reg.0 > n_shift * 3 && average_param(conformation, &seq[reg.0 - n_shift * 3..reg.0]) >= 1.0 {
+                n_shift += 1;
+            }
+            while reg.1 + c_shift * 3 < seq.len() && average_param(conformation, &seq[reg.1..reg.1 + c_shift * 3]) >= 1.0 {
+                c_shift += 1;
+            }
+        }
+        // Strand extension: extend residue by residue if it remains beta-favorable
+        else if conformation == "beta" {
+            let mut shift = (reg.0, reg.0 + 4);
+
+            // Moving towards the N-Terminus
+            while shift.0 > 0 && average_param(conformation, &seq[shift.0..shift.1]) >= 0.7 {
+                n_shift += 1;
+                shift = (shift.0 - 1, shift.1); 
+            }
+
+            // Moving towards the C-Terminus
+            shift = (reg.1, reg.1 + 4);
+            while shift.1 < seq.len() && average_param(conformation, &seq[shift.0..shift.1]) >= 0.7 {
+                c_shift += 1;
+                shift = (shift.0, shift.1 + 1);
+            }
         }
 
-        // Moving towards the C-Terminus
-        shift = (reg.1, reg.1 + 4);
-        while shift.1 < seq.len() && average_param(conformation, &seq[shift.0..shift.1]) >= 1.0 {
-            c_shift += 1;
-            shift = (shift.0, shift.1 + 1);
-        }
-
-        extended_regions.push((reg.0 - n_shift, reg.1 + c_shift));
+        extended_regions.push((reg.0 - n_shift * 3, reg.1 + c_shift * 3));
     }
 
     merge_overlapping_indexes(extended_regions)
 }
+
+
+
 
 
 pub fn is_nucleation_region(window: &str, conformation: &str, window_threshold: usize, min_param: f64) -> bool {
