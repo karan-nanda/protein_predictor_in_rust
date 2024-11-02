@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-
 // Defining the amino acid parameters as static hashmaps
 
 pub fn alpha_param() -> HashMap<char, f64> {
